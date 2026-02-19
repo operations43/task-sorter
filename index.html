@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Sequence Sorter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .draggable-item {
+            cursor: grab;
+            transition: transform 0.2s, box-shadow 0.2s;
+            touch-action: none;
+        }
+        .draggable-item:active {
+            cursor: grabbing;
+        }
+        .dragging {
+            opacity: 0.5;
+            transform: scale(1.02);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+        .drop-zone {
+            min-height: 200px;
+        }
+        /* Highlight correct placement on hover */
+        .drag-over {
+            border-top: 4px solid #3b82f6;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-white min-h-screen font-sans">
+
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <header class="text-center mb-10">
+            <h1 class="text-4xl font-extrabold mb-2 bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">
+                Task Escalation Workflow
+            </h1>
+            <p class="text-slate-400">Order the steps from start to finish to complete the escalation process.</p>
+        </header>
+
+        <div id="sortable-list" class="space-y-6 drop-zone">
+            <!-- Items will be shuffled on load -->
+        </div>
+
+        <div class="mt-12 p-8 bg-slate-800 rounded-2xl border border-slate-700 shadow-2xl">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="bg-blue-500/20 p-2 rounded-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <h2 class="text-xl font-semibold text-white">How to Play</h2>
+            </div>
+            
+            <ul class="grid grid-cols-1 md:grid-cols-2 gap-4 text-slate-300 text-sm mb-8">
+                <li class="flex items-start gap-2">
+                    <span class="text-blue-400 font-bold">1.</span>
+                    Drag the tiles to rearrange the sequence.
+                </li>
+                <li class="flex items-start gap-2">
+                    <span class="text-blue-400 font-bold">2.</span>
+                    Follow the logic of the UI screenshots.
+                </li>
+                <li class="flex items-start gap-2">
+                    <span class="text-blue-400 font-bold">3.</span>
+                    Letters (A, C, B, E, D) help identify the steps.
+                </li>
+                <li class="flex items-start gap-2">
+                    <span class="text-blue-400 font-bold">4.</span>
+                    Press "Verify Workflow" to check your work.
+                </li>
+            </ul>
+
+            <div class="flex flex-col items-center border-t border-slate-700 pt-6">
+                <button onclick="checkOrder()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 px-12 rounded-xl transition-all active:scale-95 shadow-lg shadow-blue-900/20">
+                    Verify Workflow
+                </button>
+                <div id="feedback" class="mt-6 w-full text-center font-bold text-lg hidden transition-all duration-300"></div>
+            </div>
+        </div>
+        
+        <footer class="mt-8 text-center text-slate-500 text-xs">
+            Make sure image files are in the same directory as this HTML file on GitHub.
+        </footer>
+    </div>
+
+    <script>
+        // Data structure matching your uploaded files exactly
+        const steps = [
+            { id: 1, letter: 'A', img: 'IMAGE 1.png', desc: 'Initialize: Click "New Task..."' },
+            { id: 2, letter: 'C', img: 'IMAGE 2.png', desc: 'Expand: Open full edit view' },
+            { id: 3, letter: 'B', img: 'IMAGE 3.png', desc: 'Identify: Enter the Subject line' },
+            { id: 4, letter: 'E', img: 'image 4.png', desc: 'Document: Paste description details' },
+            { id: 5, letter: 'D', img: 'image 5.png', desc: 'Finalize: Commit changes with Save' }
+        ];
+
+        const listContainer = document.getElementById('sortable-list');
+
+        function init() {
+            const shuffled = [...steps].sort(() => Math.random() - 0.5);
+            renderList(shuffled);
+        }
+
+        function renderList(items) {
+            listContainer.innerHTML = '';
+            items.forEach(step => {
+                const item = document.createElement('div');
+                item.className = 'draggable-item bg-slate-800 rounded-xl border border-slate-700 flex flex-col md:flex-row items-center gap-6 p-4 select-none shadow-md overflow-hidden';
+                item.draggable = true;
+                item.dataset.id = step.id;
+
+                item.innerHTML = `
+                    <div class="flex flex-row md:flex-col items-center gap-4">
+                        <div class="flex-shrink-0 w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl flex items-center justify-center text-2xl font-black shadow-inner">
+                            ${step.letter}
+                        </div>
+                        <div class="text-slate-500 hidden md:block">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
+                            </svg>
+                        </div>
+                    </div>
+                    
+                    <div class="flex-grow w-full">
+                        <div class="bg-slate-950 rounded-lg p-1 border border-slate-700/50 shadow-inner group">
+                            <img src="${step.img}" 
+                                 alt="Step ${step.letter}" 
+                                 class="w-full h-auto max-h-64 object-contain rounded block mx-auto transition-transform group-hover:scale-[1.01]"
+                                 onerror="handleImageError(this, '${step.desc}')">
+                        </div>
+                        <div class="mt-3 flex justify-between items-center px-1">
+                            <p class="text-sm font-semibold text-slate-300 uppercase tracking-wider">${step.desc}</p>
+                            <span class="text-[10px] text-slate-500 font-mono bg-slate-900 px-2 py-0.5 rounded border border-slate-800">${step.img}</span>
+                        </div>
+                    </div>
+                `;
+
+                setupDragEvents(item);
+                listContainer.appendChild(item);
+            });
+        }
+
+        function handleImageError(img, desc) {
+            img.style.display = 'none';
+            const parent = img.parentElement;
+            parent.innerHTML = `
+                <div class="h-32 flex flex-col items-center justify-center text-slate-500 italic p-4 text-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mb-2 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <span>Image not found: ${img.getAttribute('src')}</span>
+                    <span class="text-[10px] mt-1 not-italic">Ensure file is in the same folder as index.html</span>
+                </div>
+            `;
+        }
+
+        function setupDragEvents(item) {
+            item.addEventListener('dragstart', (e) => {
+                item.classList.add('dragging');
+                e.dataTransfer.setData('text/plain', item.dataset.id);
+            });
+
+            item.addEventListener('dragend', () => {
+                item.classList.remove('dragging');
+                // Remove all drop-over classes
+                document.querySelectorAll('.draggable-item').forEach(el => el.classList.remove('drag-over'));
+            });
+        }
+
+        listContainer.addEventListener('dragover', e => {
+            e.preventDefault();
+            const afterElement = getDragAfterElement(listContainer, e.clientY);
+            const draggable = document.querySelector('.dragging');
+            
+            if (afterElement == null) {
+                listContainer.appendChild(draggable);
+            } else {
+                listContainer.insertBefore(draggable, afterElement);
+            }
+        });
+
+        function getDragAfterElement(container, y) {
+            const draggableElements = [...container.querySelectorAll('.draggable-item:not(.dragging)')];
+
+            return draggableElements.reduce((closest, child) => {
+                const box = child.getBoundingClientRect();
+                const offset = y - box.top - box.height / 2;
+                if (offset < 0 && offset > closest.offset) {
+                    return { offset: offset, element: child };
+                } else {
+                    return closest;
+                }
+            }, { offset: Number.NEGATIVE_INFINITY }).element;
+        }
+
+        function checkOrder() {
+            const currentItems = [...listContainer.querySelectorAll('.draggable-item')];
+            const currentIds = currentItems.map(item => parseInt(item.dataset.id));
+            const correctIds = [1, 2, 3, 4, 5];
+            
+            const feedback = document.getElementById('feedback');
+            feedback.classList.remove('hidden', 'scale-95');
+            feedback.classList.add('scale-100');
+
+            const isCorrect = JSON.stringify(currentIds) === JSON.stringify(correctIds);
+
+            if (isCorrect) {
+                feedback.innerHTML = `
+                    <div class="text-emerald-400 p-4 bg-emerald-950/40 rounded-xl border border-emerald-500/30">
+                        <span class="text-2xl mr-2">✅</span> Perfect! You've mastered the escalation workflow.
+                    </div>`;
+            } else {
+                feedback.innerHTML = `
+                    <div class="text-rose-400 p-4 bg-rose-950/40 rounded-xl border border-rose-500/30">
+                        <span class="text-2xl mr-2">❌</span> The sequence is incorrect. Review the logical flow and try again!
+                    </div>`;
+            }
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
