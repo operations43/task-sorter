@@ -38,11 +38,8 @@
             <p class="text-slate-400">Order the steps from start to finish to complete the escalation process.</p>
         </header>
 
-        <div id="sortable-list" class="space-y-6 drop-zone">
-            <!-- Items will be shuffled on load -->
-        </div>
-
-        <div class="mt-12 p-8 bg-slate-800 rounded-2xl border border-slate-700 shadow-2xl">
+        <!-- Moved "How to Play" to the top -->
+        <div class="mb-10 p-8 bg-slate-800 rounded-2xl border border-slate-700 shadow-2xl">
             <div class="flex items-center gap-3 mb-4">
                 <div class="bg-blue-500/20 p-2 rounded-lg">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -52,7 +49,7 @@
                 <h2 class="text-xl font-semibold text-white">How to Play</h2>
             </div>
             
-            <ul class="grid grid-cols-1 md:grid-cols-2 gap-4 text-slate-300 text-sm mb-8">
+            <ul class="grid grid-cols-1 md:grid-cols-2 gap-4 text-slate-300 text-sm">
                 <li class="flex items-start gap-2">
                     <span class="text-blue-400 font-bold">1.</span>
                     Drag the tiles to rearrange the sequence.
@@ -67,24 +64,23 @@
                 </li>
                 <li class="flex items-start gap-2">
                     <span class="text-blue-400 font-bold">4.</span>
-                    Press "Verify Workflow" to check your work.
+                    Check your final answer in the box below.
                 </li>
             </ul>
+        </div>
 
-            <!-- New Submission Statement Section -->
-            <div class="bg-slate-900/50 border border-slate-700 p-6 rounded-xl mb-8 text-center">
+        <div id="sortable-list" class="space-y-6 drop-zone">
+            <!-- Items will be shuffled on load -->
+        </div>
+
+        <div class="mt-12 p-8 bg-slate-800 rounded-2xl border border-slate-700 shadow-2xl">
+            <!-- Updated Submission Statement Section -->
+            <div class="bg-slate-900/50 border border-slate-700 p-6 rounded-xl text-center">
                 <p class="text-slate-400 text-sm mb-2 uppercase tracking-widest">Your Current Sequence</p>
                 <div class="text-2xl font-mono text-blue-400">
                     If you are happy with the order, your answer is: 
                     <span id="sequence-display" class="font-black text-white ml-2 bg-blue-600 px-3 py-1 rounded shadow-lg"></span>
                 </div>
-            </div>
-
-            <div class="flex flex-col items-center border-t border-slate-700 pt-6">
-                <button onclick="checkOrder()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 px-12 rounded-xl transition-all active:scale-95 shadow-lg shadow-blue-900/20">
-                    Verify Workflow
-                </button>
-                <div id="feedback" class="mt-6 w-full text-center font-bold text-lg hidden transition-all duration-300"></div>
             </div>
         </div>
         
@@ -210,30 +206,6 @@
                     return closest;
                 }
             }, { offset: Number.NEGATIVE_INFINITY }).element;
-        }
-
-        function checkOrder() {
-            const currentItems = [...listContainer.querySelectorAll('.draggable-item')];
-            const currentIds = currentItems.map(item => parseInt(item.dataset.id));
-            const correctIds = [1, 2, 3, 4, 5];
-            
-            const feedback = document.getElementById('feedback');
-            feedback.classList.remove('hidden', 'scale-95');
-            feedback.classList.add('scale-100');
-
-            const isCorrect = JSON.stringify(currentIds) === JSON.stringify(correctIds);
-
-            if (isCorrect) {
-                feedback.innerHTML = `
-                    <div class="text-emerald-400 p-4 bg-emerald-950/40 rounded-xl border border-emerald-500/30">
-                        <span class="text-2xl mr-2">✅</span> Perfect! You've mastered the escalation workflow.
-                    </div>`;
-            } else {
-                feedback.innerHTML = `
-                    <div class="text-rose-400 p-4 bg-rose-950/40 rounded-xl border border-rose-500/30">
-                        <span class="text-2xl mr-2">❌</span> The sequence is incorrect. Review the logical flow and try again!
-                    </div>`;
-            }
         }
 
         window.onload = init;
