@@ -26,16 +26,11 @@
         .drag-over {
             border-top: 4px solid #3b82f6;
         }
-        /* Scale the main container to 75% */
-        .scaled-container {
-            transform: scale(0.75);
-            transform-origin: top center;
-        }
     </style>
 </head>
 <body class="bg-slate-900 text-white min-h-screen font-sans">
 
-    <div class="container mx-auto px-4 py-8 max-w-4xl scaled-container">
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
         <header class="text-center mb-10">
             <h1 class="text-4xl font-extrabold mb-2 bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">
                 Task Escalation Workflow
@@ -159,13 +154,14 @@
             const afterElement = getDragAfterElement(listContainer, e.clientY);
             const draggable = document.querySelector('.dragging');
             
-            if (afterElement == null) {
-                listContainer.appendChild(draggable);
-            } else {
-                listContainer.insertBefore(draggable, afterElement);
+            if (draggable) {
+                if (afterElement == null) {
+                    listContainer.appendChild(draggable);
+                } else {
+                    listContainer.insertBefore(draggable, afterElement);
+                }
+                updateSequenceDisplay();
             }
-            // Real-time update while dragging
-            updateSequenceDisplay();
         });
 
         function getDragAfterElement(container, y) {
