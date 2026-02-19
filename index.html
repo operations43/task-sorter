@@ -26,48 +26,22 @@
         .drag-over {
             border-top: 4px solid #3b82f6;
         }
+        /* Scale the main container to 75% */
+        .scaled-container {
+            transform: scale(0.75);
+            transform-origin: top center;
+        }
     </style>
 </head>
 <body class="bg-slate-900 text-white min-h-screen font-sans">
 
-    <div class="container mx-auto px-4 py-8 max-w-4xl">
+    <div class="container mx-auto px-4 py-8 max-w-4xl scaled-container">
         <header class="text-center mb-10">
             <h1 class="text-4xl font-extrabold mb-2 bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">
                 Task Escalation Workflow
             </h1>
             <p class="text-slate-400">Order the steps from start to finish to complete the escalation process.</p>
         </header>
-
-        <!-- Moved "How to Play" to the top -->
-        <div class="mb-10 p-8 bg-slate-800 rounded-2xl border border-slate-700 shadow-2xl">
-            <div class="flex items-center gap-3 mb-4">
-                <div class="bg-blue-500/20 p-2 rounded-lg">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                </div>
-                <h2 class="text-xl font-semibold text-white">How to Play</h2>
-            </div>
-            
-            <ul class="grid grid-cols-1 md:grid-cols-2 gap-4 text-slate-300 text-sm">
-                <li class="flex items-start gap-2">
-                    <span class="text-blue-400 font-bold">1.</span>
-                    Drag the tiles to rearrange the sequence.
-                </li>
-                <li class="flex items-start gap-2">
-                    <span class="text-blue-400 font-bold">2.</span>
-                    Follow the logic of the UI screenshots.
-                </li>
-                <li class="flex items-start gap-2">
-                    <span class="text-blue-400 font-bold">3.</span>
-                    Letters (A, C, B, E, D) help identify the steps.
-                </li>
-                <li class="flex items-start gap-2">
-                    <span class="text-blue-400 font-bold">4.</span>
-                    Check your final answer in the box below.
-                </li>
-            </ul>
-        </div>
 
         <div id="sortable-list" class="space-y-6 drop-zone">
             <!-- Items will be shuffled on load -->
