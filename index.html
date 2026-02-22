@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="A static educational tool for training on task escalation workflows.">
     <title>Task Sequence Sorter</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -23,52 +22,118 @@
         .drop-zone {
             min-height: 200px;
         }
-        /* Highlight correct placement on hover */
-        .drag-over {
-            border-top: 4px solid #3b82f6;
-        }
     </style>
 </head>
 <body class="bg-slate-900 text-white min-h-screen font-sans">
 
+    <!-- Language Toggle -->
+    <div class="fixed top-4 right-4 z-50">
+        <div class="inline-flex rounded-md shadow-sm" role="group">
+            <button onclick="setLanguage('en')" id="btn-en" class="px-4 py-2 text-sm font-medium border border-slate-700 rounded-l-lg hover:bg-slate-800 bg-blue-600">
+                EN
+            </button>
+            <button onclick="setLanguage('es')" id="btn-es" class="px-4 py-2 text-sm font-medium border border-slate-700 rounded-r-lg hover:bg-slate-800 bg-slate-800">
+                ES
+            </button>
+        </div>
+    </div>
+
     <div class="container mx-auto px-4 py-8 max-w-4xl">
         <header class="text-center mb-10">
-            <h1 class="text-4xl font-extrabold mb-2 bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">
+            <h1 id="main-title" class="text-4xl font-extrabold mb-2 bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">
                 Task Escalation Workflow
             </h1>
-            <p class="text-slate-400">Order the steps from start to finish to complete the escalation process.</p>
+            <p id="main-subtitle" class="text-slate-400">Order the steps from start to finish to complete the escalation process.</p>
         </header>
 
         <div id="sortable-list" class="space-y-6 drop-zone">
-            <!-- Items will be shuffled on load -->
+            <!-- Items will be shuffled and rendered here -->
         </div>
 
         <div class="mt-12 p-8 bg-slate-800 rounded-2xl border border-slate-700 shadow-2xl">
-            <!-- Updated Submission Statement Section -->
             <div class="bg-slate-900/50 border border-slate-700 p-6 rounded-xl text-center">
-                <p class="text-slate-400 text-sm mb-2 uppercase tracking-widest">Your Current Sequence</p>
-                <div class="text-2xl font-mono text-blue-400">
-                    If you are happy with the order, your answer is: 
+                <p id="sequence-label" class="text-slate-400 text-sm mb-2 uppercase tracking-widest">Your Current Sequence</p>
+                <div class="text-xl md:text-2xl font-mono text-blue-400">
+                    <span id="submission-text">If you are happy with the order, your answer is:</span>
                     <span id="sequence-display" class="font-black text-white ml-2 bg-blue-600 px-3 py-1 rounded shadow-lg"></span>
                 </div>
             </div>
-       
+        </div>
+        
+        <footer class="mt-8 text-center text-slate-500 text-xs">
+            <p id="footer-note">Make sure image files are in the same directory as this HTML file on GitHub.</p>
+        </footer>
+    </div>
 
     <script>
-        // Data structure matching your uploaded files exactly
-        const steps = [
-            { id: 1, letter: 'A', img: 'IMAGE 1.png', desc: 'Initialize: Click "New Task..."' },
-            { id: 2, letter: 'C', img: 'IMAGE 2.png', desc: 'Expand: Open full edit view' },
-            { id: 3, letter: 'B', img: 'IMAGE 3.png', desc: 'Identify: Enter the Subject line' },
-            { id: 4, letter: 'E', img: 'image 4.png', desc: 'Document: Paste description details' },
-            { id: 5, letter: 'D', img: 'image 5.png', desc: 'Finalize: Commit changes with Save' }
-        ];
+        let currentLang = 'en';
+
+        const i18n = {
+            en: {
+                title: "Task Escalation Workflow",
+                subtitle: "Order the steps from start to finish to complete the escalation process.",
+                submission: "If you are happy with the order, your answer is:",
+                label: "Your Current Sequence",
+                footer: "Make sure image files are in the same directory as this HTML file on GitHub.",
+                missing: "Missing Screenshot",
+                steps: [
+                    { id: 1, letter: 'A', img: 'IMAGE 1.png', desc: 'Initialize: Click "New Task..."' },
+                    { id: 2, letter: 'C', img: 'IMAGE 2.png', desc: 'Expand: Open full edit view' },
+                    { id: 3, letter: 'B', img: 'IMAGE 3.png', desc: 'Identify: Enter the Subject line' },
+                    { id: 4, letter: 'E', img: 'image 4.png', desc: 'Document: Paste description details' },
+                    { id: 5, letter: 'D', img: 'image 5.png', desc: 'Finalize: Commit changes with Save' }
+                ]
+            },
+            es: {
+                title: "Flujo de Escalamiento de Tareas",
+                subtitle: "Ordene los pasos de principio a fin para completar el proceso de escalamiento.",
+                submission: "Si está satisfecho con el orden, su respuesta es:",
+                label: "Su Secuencia Actual",
+                footer: "Asegúrese de que los archivos de imagen estén en el mismo directorio que este archivo HTML en GitHub.",
+                missing: "Captura de pantalla faltante",
+                steps: [
+                    { id: 1, letter: 'A', img: 'IMAGE 1.png', desc: 'Inicializar: Haga clic en "Nueva tarea..."' },
+                    { id: 2, letter: 'C', img: 'IMAGE 2.png', desc: 'Expandir: Abrir la vista de edición completa' },
+                    { id: 3, letter: 'B', img: 'IMAGE 3.png', desc: 'Identificar: Ingrese la línea de asunto' },
+                    { id: 4, letter: 'E', img: 'image 4.png', desc: 'Documentar: Pegar detalles de la descripción' },
+                    { id: 5, letter: 'D', img: 'image 5.png', desc: 'Finalizar: Confirmar cambios con Guardar' }
+                ]
+            }
+        };
 
         const listContainer = document.getElementById('sortable-list');
         const sequenceDisplay = document.getElementById('sequence-display');
 
+        function setLanguage(lang) {
+            currentLang = lang;
+            
+            // Update UI text
+            document.getElementById('main-title').textContent = i18n[lang].title;
+            document.getElementById('main-subtitle').textContent = i18n[lang].subtitle;
+            document.getElementById('submission-text').textContent = i18n[lang].submission;
+            document.getElementById('sequence-label').textContent = i18n[lang].label;
+            document.getElementById('footer-note').textContent = i18n[lang].footer;
+
+            // Update buttons
+            document.getElementById('btn-en').classList.toggle('bg-blue-600', lang === 'en');
+            document.getElementById('btn-en').classList.toggle('bg-slate-800', lang !== 'en');
+            document.getElementById('btn-es').classList.toggle('bg-blue-600', lang === 'es');
+            document.getElementById('btn-es').classList.toggle('bg-slate-800', lang !== 'es');
+
+            // Refresh descriptions on current items without re-shuffling
+            const items = listContainer.querySelectorAll('.draggable-item');
+            items.forEach(item => {
+                const id = parseInt(item.dataset.id);
+                const stepData = i18n[lang].steps.find(s => s.id === id);
+                const descEl = item.querySelector('.step-desc');
+                if (descEl) descEl.textContent = stepData.desc;
+            });
+
+            updateSequenceDisplay();
+        }
+
         function init() {
-            const shuffled = [...steps].sort(() => Math.random() - 0.5);
+            const shuffled = [...i18n.en.steps].sort(() => Math.random() - 0.5);
             renderList(shuffled);
             updateSequenceDisplay();
         }
@@ -80,7 +145,7 @@
                 item.className = 'draggable-item bg-slate-800 rounded-xl border border-slate-700 flex flex-col md:flex-row items-center gap-6 p-4 select-none shadow-md overflow-hidden';
                 item.draggable = true;
                 item.dataset.id = step.id;
-                item.dataset.letter = step.letter; // Store letter for the display update
+                item.dataset.letter = step.letter;
 
                 item.innerHTML = `
                     <div class="flex flex-row md:flex-col items-center gap-4">
@@ -99,10 +164,10 @@
                             <img src="${step.img}" 
                                  alt="Step Image" 
                                  class="w-full h-auto max-h-64 object-contain rounded block mx-auto transition-transform group-hover:scale-[1.01]"
-                                 onerror="handleImageError(this, '${step.desc}')">
+                                 onerror="handleImageError(this)">
                         </div>
                         <div class="mt-3 flex justify-between items-center px-1">
-                            <p class="text-sm font-semibold text-slate-300 uppercase tracking-wider">${step.desc}</p>
+                            <p class="step-desc text-sm font-semibold text-slate-300 uppercase tracking-wider">${step.desc}</p>
                         </div>
                     </div>
                 `;
@@ -118,7 +183,7 @@
             sequenceDisplay.textContent = currentLetters.join('-');
         }
 
-        function handleImageError(img, desc) {
+        function handleImageError(img) {
             img.style.display = 'none';
             const parent = img.parentElement;
             parent.innerHTML = `
@@ -126,8 +191,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mb-2 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
-                    <span>Missing Screenshot</span>
-                    <span class="text-[10px] mt-1 not-italic">Check GitHub directory for matching file</span>
+                    <span>${i18n[currentLang].missing}</span>
                 </div>
             `;
         }
@@ -140,8 +204,7 @@
 
             item.addEventListener('dragend', () => {
                 item.classList.remove('dragging');
-                document.querySelectorAll('.draggable-item').forEach(el => el.classList.remove('drag-over'));
-                updateSequenceDisplay(); // Update letters after drop finishes
+                updateSequenceDisplay();
             });
         }
 
@@ -149,7 +212,6 @@
             e.preventDefault();
             const afterElement = getDragAfterElement(listContainer, e.clientY);
             const draggable = document.querySelector('.dragging');
-            
             if (draggable) {
                 if (afterElement == null) {
                     listContainer.appendChild(draggable);
@@ -162,7 +224,6 @@
 
         function getDragAfterElement(container, y) {
             const draggableElements = [...container.querySelectorAll('.draggable-item:not(.dragging)')];
-
             return draggableElements.reduce((closest, child) => {
                 const box = child.getBoundingClientRect();
                 const offset = y - box.top - box.height / 2;
@@ -178,5 +239,3 @@
     </script>
 </body>
 </html>
-
-
